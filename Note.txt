@@ -1,0 +1,34 @@
+Technologies:
+    1. Nest Js
+    2. PostgreSQL --> Prisma using neon.tech
+
+Schemas:
+    Course :
+        id,
+        name,
+        catagory_id,
+        sub_catagory_id
+    
+    catagories:
+        id,
+        name
+    
+    sub_catagory: 
+        id,
+        name
+
+Validations:
+  Course:
+    1. name, catagory_id and sub_catagory_id shouldn't be empty 
+    2. same name, catagory_id, and sub_catagory_id not allowed
+
+  catagories:
+    1. name is unique
+    2. connot delete if it is assigned for any Course
+
+  sub catagory:
+    1. name is unique
+    2. connot delete if it is assigned for any Course
+
+Functionality:
+  CRUD Operations available for all 

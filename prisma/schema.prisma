@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// prisma/schema.prisma
+datasource db {
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+  // uncomment next line if you use Prisma <5.10
+  directUrl = env("DATABASE_URL")
+}
+
+
+model Cat{
+  id Int @id @default(autoincrement())
+  name String @unique
+  courses Course[] 
+}
+
+model Sub_cat{
+  id Int @id @default(autoincrement())
+  name String @unique
+  courses Course[] 
+}
+
+model Course{
+  id Int @id @default(autoincrement())
+  name String 
+  cat_id Int 
+  category  Cat    @relation(fields: [cat_id], references: [id])
+  sub_cat_id Int 
+  sub_category  Sub_cat    @relation(fields: [sub_cat_id], references: [id])
+}
