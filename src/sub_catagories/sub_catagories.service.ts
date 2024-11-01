@@ -26,9 +26,12 @@ export class SubCatagoriesService {
       }
 
       //going to save
-      return this.databaseService.sub_cat.create({
+      const result = await this.databaseService.sub_cat.create({
         data: createSubCatagoryDto
       });
+
+      //sending final result
+      return result; 
     }
     catch(error){
       console.error('Error whild inserting :', error);
@@ -53,12 +56,15 @@ export class SubCatagoriesService {
         throw new Error(`Sub-Catagory Id ${id} not found`);
       }
       
-      //sending data 
-      return this.databaseService.sub_cat.findUnique({
+      // getting all data
+      const result = await this.databaseService.sub_cat.findUnique({
         where:{
           id,
         }
-      });
+      }); 
+
+      //sending final result
+      return result;
     }
     catch(error){
       console.error('Error whild retrieving :', error);
@@ -84,12 +90,15 @@ export class SubCatagoriesService {
       }
 
       //updating data in table
-      return this.databaseService.sub_cat.update({
+      const result = await this.databaseService.sub_cat.update({
         where: {
           id
         },
         data: updateSubCatagoryDto
       });
+
+      //sending final result
+      return result;
 
     }
     catch(error){
@@ -121,11 +130,14 @@ export class SubCatagoriesService {
       }
 
       // deleting the data
-      return this.databaseService.sub_cat.delete({
+      const result = await this.databaseService.sub_cat.delete({
         where: {
           id
         }
       });
+      
+      //sending final result
+      return result; 
     }
     catch(error){
       console.error('Error whild deleting :', error);

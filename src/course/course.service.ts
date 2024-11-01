@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { error } from 'console';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
@@ -20,24 +20,59 @@ export class CourseService {
           throw new Error('Enter proper Sub-Catagory')
         }
 
-        //checking duplications
-        const dub_check = await this.databaseService.course.findMany({
+        // validation for receiving data is preset in correponding table or not
+        const checking_cat = await this.databaseService.cat.findUnique({
           where:{
-            name: createCourseDto.name,
-            cat_id: createCourseDto.category,
-            sub_cat_id: createCourseDto.sub_category
+            id : createCourseDto.category
           }
         })
-        if (dub_check.length > 0){
-          throw new Error('Already Same Data Exists')
+
+        if(!checking_cat){
+          throw new Error('Entered value is not present in Catagory')
+        }
+
+        const checking_sub_cat = await this.databaseService.sub_cat.findUnique({
+          where:{
+            id : createCourseDto.sub_category
+          }
+        })
+
+        if(!checking_sub_cat){
+          throw new Error('Entered value is not present in Sub Catagory')
+        }
+
+        //checking duplications
+        const dub_check = await this.databaseService.course.findFirst({
+          where:{
+            name: { equals: createCourseDto.name, mode: 'insensitive' },
+            category: { id: createCourseDto.category },
+            sub_category: { id: createCourseDto.sub_category }
+          }
+        })
+        if (dub_check){
+          throw new Error('same name, category, and sub-category already exists.');
         }
 
         // saving data
-        return this.databaseService.course.create({
-          data: createCourseDto
+        const result = await this.databaseService.course.create({
+          data: {
+            name: createCourseDto.name,
+            category: {
+              connect: { id: createCourseDto.category }, 
+            },
+            sub_category: {
+              connect: { id: createCourseDto.sub_category },  
+            },
+          },
         });
+        
+        //sending final result
+        return result;
     }
     catch(error){
+      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new Error('Duplicate entry detected for name, category, and sub-category.');
+      }
       console.error('Error whild inserting :', error);
       throw error;
     }
@@ -96,11 +131,25 @@ export class CourseService {
       }
 
       //sending data
-      return this.databaseService.course.findUnique({
+      const result = await this.databaseService.course.findUnique({
         where: {
           id
         }
       });
+      
+      //for transform the data
+      const input = {
+        id: result.id,
+        name: result.name,
+        cat_id: result.cat_id,
+        sub_cat_id: result.sub_cat_id
+      };
+      
+      const output = transformCourseData(input);
+
+
+      //sending final result
+      return output;
     }
     catch(error){
       console.error('Error whild retrieving :', error);
@@ -134,9 +183,9 @@ export class CourseService {
       // strong validation to avoid same record
       const dub_check = await this.databaseService.course.findMany({
         where:{
-          name: updateCourseDto.name,
-          cat_id: updateCourseDto.category,
-          sub_cat_id: updateCourseDto.sub_category
+          name: { equals: updateCourseDto.name, mode: 'insensitive' },
+          category: { id: updateCourseDto.category },
+          sub_category: { id: updateCourseDto.sub_category },
         }
       })
       if (dub_check.length > 0){
@@ -144,12 +193,34 @@ export class CourseService {
       }
 
       //updating data
-      return this.databaseService.course.update({
+      const result = await this.databaseService.course.update({
         where: {
           id,
         },
-        data: updateCourseDto
+        data: {
+          name: updateCourseDto.name,
+          category: {
+            connect: { id: updateCourseDto.category }, 
+          },
+          sub_category: {
+            connect: { id: updateCourseDto.sub_category },  
+          },
+        },
       });
+      
+      //for transform the data
+      const input = {
+        id: result.id,
+        name: result.name,
+        cat_id: result.cat_id,
+        sub_cat_id: result.sub_cat_id
+      };
+      
+      const output = transformCourseData(input);
+
+
+      //sending final result
+      return output;
     }
     catch(error){
       console.error('Error whild updating :', error);
@@ -170,15 +241,28 @@ export class CourseService {
       }
       
       //deleting data
-      return this.databaseService.course.delete({
+      const result = await this.databaseService.course.delete({
         where: {
           id
         }
       });
+
+      //sending final result
+      return result;
     }
     catch(error){
       console.error('Error whild deleting :', error);
       throw error;
     }
   }
+}
+
+// After updation result is not reaching expection so this code transform the data as we expected
+function transformCourseData(input: { id: number; name: string; cat_id: number; sub_cat_id: number }) {
+  return {
+    id: input.id,
+    name: input.name,
+    catagory: input.cat_id,        // Changing 'cat_id' to 'catagory'
+    'sub catagory': input.sub_cat_id // Changing 'sub_cat_id' to 'sub catagory'
+  };
 }

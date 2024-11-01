@@ -25,9 +25,12 @@ export class CatagoriesService {
       }
 
       //going to save
-      return this.databaseService.cat.create({
+      const result = await this.databaseService.cat.create({
         data: createCatagoryDto
       });
+      
+      //sending final result
+      return result;
     }
     catch(error){
       console.error('Error whild inserting :', error);
@@ -49,16 +52,19 @@ export class CatagoriesService {
         }
       })
 
-      if(!existingData){
+      if(existingData.length == 0){
         throw new Error(`Catagory Id - ${id} Not Found`);
       }
       
-      //sending data 
-      return this.databaseService.cat.findUnique({
+      //sending data
+      const result = await this.databaseService.cat.findUnique({
         where: {
           id
         }
       });
+
+      //sending final result
+      return result;
     }
     catch(error){
       console.error('Error whild retrieveing :', error);
@@ -85,12 +91,15 @@ export class CatagoriesService {
       }
 
       //updating data
-      return this.databaseService.cat.update({
+      const result = await this.databaseService.cat.update({
         where: {
           id,
         },
         data: updateCatagoryDto
       });
+
+      //sening final result
+      return result;
     }
     catch(error){
       console.error('Error whild Updating :', error);
@@ -122,11 +131,14 @@ export class CatagoriesService {
       }
 
       //deleting data
-      return this.databaseService.cat.delete({
+      const result = await this.databaseService.cat.delete({
         where: {
           id
         }
       });
+
+      //sending final result
+      return result;
     }
     catch(error){
       console.error('Error whild Deleting :', error);
