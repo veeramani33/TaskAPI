@@ -21,6 +21,7 @@ Validations:
   Course:
     1. name, catagory_id and sub_catagory_id shouldn't be empty 
     2. same name, catagory_id, and sub_catagory_id not allowed
+    3. validation for entered value is present in corresponding table
 
   catagories:
     1. name is unique
