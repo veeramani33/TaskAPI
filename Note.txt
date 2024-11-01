@@ -1,5 +1,5 @@
 Technologies:
-    1. Nest Js
+    1. Nest Js, Typescript
     2. PostgreSQL --> Prisma using neon.tech
 
 Schemas:
